@@ -2,15 +2,25 @@ const express = require("express");
 const dotenv = require("dotenv");
 
 const connectToDatabase = require("./src/database/mongoose.database");
+const TaskModel = require("./src/models/task.model.js");
 
 dotenv.config();
 
 const app = express();
+app.use(express.json());
 
 connectToDatabase();
 
-app.get("/", (req, res) => {
-    res.status(200).send("Hello World!");
+app.get("/tasks", async (req, res) => {
+    const tasks = await TaskModel.find({});
+    res.status(201).send(tasks);
+});
+
+app.post("/tasks", async (req, res) => {
+    const newTask = new TaskModel(req.body);
+    await newTask.save();
+
+    res.status(201).send(newTask);
 });
 
 app.listen(8000, () => {
