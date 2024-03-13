@@ -44,6 +44,25 @@ app.post("/tasks", async (req, res) => {
     }
 });
 
+app.put("/tasks/:id", async (req, res) => {
+    try {
+        const taskId = req.params.id;
+        const taskData = req.body;
+
+        const taskToUpdate = await TaskModel.findByIdAndUpdate(
+            taskId,
+            taskData,
+            {
+                new: true,
+            }
+        );
+
+        res.status(200).send(taskToUpdate);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+});
+
 app.delete("/tasks/:id", async (req, res) => {
     try {
         const taskId = req.params.id;
