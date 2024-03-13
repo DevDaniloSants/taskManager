@@ -12,15 +12,39 @@ app.use(express.json());
 connectToDatabase();
 
 app.get("/tasks", async (req, res) => {
-    const tasks = await TaskModel.find({});
-    res.status(201).send(tasks);
+    try {
+        const tasks = await TaskModel.find({});
+        res.status(201).send(tasks);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
 });
 
 app.post("/tasks", async (req, res) => {
-    const newTask = new TaskModel(req.body);
-    await newTask.save();
+    try {
+        const newTask = new TaskModel(req.body);
+        await newTask.save();
 
-    res.status(201).send(newTask);
+        res.status(201).send(newTask);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+});
+
+app.delete("/tasks/:id", async (req, res) => {
+    try {
+        const taskId = req.params.id;
+
+        const taskToDelete = await TaskModel.findById(taskId);
+
+        if (!taskToDelete) return res.status(500).send("Tarefa não encontrada");
+
+        const deleteTask = await TaskModel.findByIdAndDelete(taskToDelete);
+
+        res.status(201).send(deleteTask);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
 });
 
 app.listen(8000, () => {
