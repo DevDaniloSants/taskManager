@@ -1,5 +1,11 @@
 const TaskModel = require("../models/task.model");
 
+const {
+    notFoundError,
+    objectIdCastError,
+} = require("../errors/mongodb.errors");
+const { default: mongoose } = require("mongoose");
+
 class TaskController {
     constructor(req, res) {
         this.req = req;
@@ -20,11 +26,13 @@ class TaskController {
             const taskId = this.req.params.id;
             const task = await TaskModel.findById(taskId);
 
-            if (!task)
-                return this.res.status(404).send("Tarefa não encontrada");
+            if (!task) return notFoundError(this.res);
 
             this.res.status(200).send(task);
         } catch (error) {
+            if (error instanceof mongoose.Error.CastError)
+                return objectIdCastError(this.res);
+
             this.res.status(500).send(error.message);
         }
     }
@@ -55,6 +63,9 @@ class TaskController {
 
             this.res.status(200).send(taskToUpdate);
         } catch (error) {
+            if (error instanceof mongoose.Error.CastError)
+                return objectIdCastError(this.res);
+
             this.res.status(500).send(error.message);
         }
     }
@@ -65,13 +76,15 @@ class TaskController {
 
             const taskToDelete = await TaskModel.findById(taskId);
 
-            if (!taskToDelete)
-                return this.res.status(404).send("Tarefa não encontrada");
+            if (!taskToDelete) return notFoundError(this.res);
 
             const deleteTask = await TaskModel.findByIdAndDelete(taskToDelete);
 
             this.res.status(201).send(deleteTask);
         } catch (error) {
+            if (error instanceof mongoose.Error.CastError)
+                return objectIdCastError(this.res);
+
             this.res.status(500).send(error.message);
         }
     }
